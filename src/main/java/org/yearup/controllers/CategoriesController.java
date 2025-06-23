@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.yearup.data.CategoryDao;
 import org.yearup.data.ProductDao;
 import org.yearup.models.Category;
@@ -37,7 +38,14 @@ public class CategoriesController
     public List<Category> getAll()
     {
         // find and return all categories
-        return categoryDao.getAllCategories();
+        try
+        {
+            return categoryDao.getAllCategories();
+        }
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to retrieve categories.");
+        }
     }
 
 
@@ -46,7 +54,19 @@ public class CategoriesController
     public Category getById(@PathVariable int id)
     {
         // get the category by id
-        return categoryDao.getById(id);
+        try
+        {
+            Category category = categoryDao.getById(id);
+
+            if (category == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found.");
+
+            return category;
+        }
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to retrieve category.");
+        }
     }
 
     // the url to return all products in category 1 would look like this
@@ -55,7 +75,14 @@ public class CategoriesController
     public List<Product> getProductsById(@PathVariable int categoryId)
     {
         // get a list of product by categoryId
-        return productDao.listByCategoryId(categoryId);
+        try
+        {
+            return productDao.listByCategoryId(categoryId);
+        }
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to retrieve products for the category.");
+        }
     }
 
     // add annotation to call this method for a POST action
@@ -66,7 +93,14 @@ public class CategoriesController
     public Category addCategory(@RequestBody Category category)
     {
         // insert the category
-        return categoryDao.create(category);
+        try
+        {
+            return categoryDao.create(category);
+        }
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to add category.");
+        }
     }
 
     // add annotation to call this method for a PUT (update) action - the url path must include the categoryId
@@ -76,7 +110,14 @@ public class CategoriesController
     public void updateCategory(@PathVariable int id, @RequestBody Category category)
     {
         // update the category by id
-        categoryDao.update(id, category);
+        try
+        {
+            categoryDao.update(id, category);
+        }
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update category.");
+        }
     }
 
 
@@ -88,6 +129,18 @@ public class CategoriesController
     public void deleteCategory(@PathVariable int id)
     {
         // delete the category by id
-        categoryDao.delete(id);
+        try
+        {
+            Category category = categoryDao.getById(id);
+
+            if (category == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found.");
+
+            categoryDao.delete(id);
+        }
+        catch(Exception ex)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to delete category.");
+        }
     }
 }
