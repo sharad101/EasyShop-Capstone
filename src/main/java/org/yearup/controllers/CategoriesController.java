@@ -54,19 +54,24 @@ public class CategoriesController
     public Category getById(@PathVariable int id)
     {
         // get the category by id
+
+        Category category = null;
         try
         {
-            Category category = categoryDao.getById(id);
-
-            if (category == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found.");
-
-            return category;
+            category = categoryDao.getById(id);
         }
         catch(Exception ex)
         {
+            ex.printStackTrace(); // Optional: helpful for debugging
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to retrieve category.");
         }
+
+        if (category == null)
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found.");
+        }
+
+        return category;
     }
 
     // the url to return all products in category 1 would look like this
