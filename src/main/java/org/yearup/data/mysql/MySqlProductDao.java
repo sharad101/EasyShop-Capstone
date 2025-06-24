@@ -18,89 +18,70 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         super(dataSource);
     }
 
-//    @Override
-//    public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String color)
-//    {
-//        List<Product> products = new ArrayList<>();
-//
-//        String sql = "SELECT * FROM products " +
-//                "WHERE (category_id = ? OR ? = -1) " +
-//                "   AND (price <= ? OR ? = -1) " +
-//                "   AND (color = ? OR ? = '') ";
-//
-//        categoryId = categoryId == null ? -1 : categoryId;
-//        minPrice = minPrice == null ? new BigDecimal("-1") : minPrice;
-//        maxPrice = maxPrice == null ? new BigDecimal("-1") : maxPrice;
-//        color = color == null ? "" : color;
-//
-//        try (Connection connection = getConnection())
-//        {
-//            PreparedStatement statement = connection.prepareStatement(sql);
-//            statement.setInt(1, categoryId);
-//            statement.setInt(2, categoryId);
-//            statement.setBigDecimal(3, minPrice);
-//            statement.setBigDecimal(4, minPrice);
-//            statement.setString(5, color);
-//            statement.setString(6, color);
-//
-//            ResultSet row = statement.executeQuery();
-//
-//            while (row.next())
-//            {
-//                Product product = mapRow(row);
-//                products.add(product);
-//            }
-//        }
-//        catch (SQLException e)
-//        {
-//            throw new RuntimeException(e);
-//        }
-//
-//        return products;
-//    }
-@Override
-public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String color)
-{
-    List<Product> products = new ArrayList<>();
+    @Override
+    public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String color)
+    {
+        List<Product> products = new ArrayList<>();
 
+        // OLD SQL (BUGGY - only checks upper bound for price)
+    /*
     String sql = "SELECT * FROM products " +
             "WHERE (category_id = ? OR ? = -1) " +
-            "  AND (price >= ? OR ? = -1) " +  // minPrice check
-            "  AND (price <= ? OR ? = -1) " +  // maxPrice check
-            "  AND (color = ? OR ? = '')";     // color check
+            "   AND (price <= ? OR ? = -1) " +
+            "   AND (color = ? OR ? = '') ";
+    */
 
-    categoryId = categoryId == null ? -1 : categoryId;
-    minPrice = minPrice == null ? new BigDecimal("-1") : minPrice;
-    maxPrice = maxPrice == null ? new BigDecimal("-1") : maxPrice;
-    color = color == null ? "" : color;
+        // NEW SQL (FIXED - checks both min and max price)
+        String sql = "SELECT * FROM products " +
+                "WHERE (category_id = ? OR ? = -1) " +
+                "  AND (price >= ? OR ? = -1) " +  // new: check minPrice
+                "  AND (price <= ? OR ? = -1) " +  // new: check maxPrice
+                "  AND (color = ? OR ? = '')";
 
-    try (Connection connection = getConnection();
-         PreparedStatement statement = connection.prepareStatement(sql))
-    {
+        // Default values for nulls
+        categoryId = categoryId == null ? -1 : categoryId;
+        minPrice = minPrice == null ? new BigDecimal("-1") : minPrice;
+        maxPrice = maxPrice == null ? new BigDecimal("-1") : maxPrice;
+        color = color == null ? "" : color;
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql))
+        {
+            // OLD (BUGGY - only 6 parameters, repeated minPrice in place of maxPrice)
+        /*
         statement.setInt(1, categoryId);
         statement.setInt(2, categoryId);
         statement.setBigDecimal(3, minPrice);
         statement.setBigDecimal(4, minPrice);
-        statement.setBigDecimal(5, maxPrice);
-        statement.setBigDecimal(6, maxPrice);
-        statement.setString(7, color);
-        statement.setString(8, color);
+        statement.setString(5, color);
+        statement.setString(6, color);
+        */
 
-        ResultSet row = statement.executeQuery();
+            //NEW (CORRECT parameter mapping for category, minPrice, maxPrice, and color)
+            statement.setInt(1, categoryId);           // categoryId
+            statement.setInt(2, categoryId);
+            statement.setBigDecimal(3, minPrice);      // minPrice
+            statement.setBigDecimal(4, minPrice);
+            statement.setBigDecimal(5, maxPrice);      // maxPrice
+            statement.setBigDecimal(6, maxPrice);
+            statement.setString(7, color);             // color
+            statement.setString(8, color);
 
-        while (row.next())
-        {
-            Product product = mapRow(row);
-            products.add(product);
+            ResultSet row = statement.executeQuery();
+
+            while (row.next())
+            {
+                Product product = mapRow(row);
+                products.add(product);
+            }
         }
-    }
-    catch (SQLException e)
-    {
-        throw new RuntimeException(e);
-    }
+        catch (SQLException e)
+        {
+            throw new RuntimeException(e);
+        }
 
-    return products;
-}
+        return products;
+    }
 
 
     @Override
