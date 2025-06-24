@@ -18,84 +18,6 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         super(dataSource);
     }
 
-    @Override
-    public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String color)
-    {
-        // Create a list to store the search results
-        List<Product> products = new ArrayList<>();
-
-        // List to store parameters that we will bind to the SQL query
-        List<Object> parameters = new ArrayList<>();
-
-        // Start building the SQL query with a base condition that is always true (1=1)
-        // This allows us to append "AND" clauses easily
-        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE 1=1");
-
-        // Filter by categoryId if it is provided (not null)
-        // I was stuck here
-        if (categoryId != null)
-        {
-            sql.append(" AND category_id = ?");
-            parameters.add(categoryId);
-        }
-
-        // Filter by minimum price if provided
-        if (minPrice != null)
-        {
-            sql.append(" AND price >= ?");
-            parameters.add(minPrice);
-        }
-
-        // Filter by maximum price if provided
-        if (maxPrice != null)
-        {
-            sql.append(" AND price <= ?");
-            parameters.add(maxPrice);
-        }
-
-        // Filter by color if provided and not blank
-        if (color != null && !color.isBlank())
-        {
-            // Use LOWER() for case-insensitive comparison
-            sql.append(" AND LOWER(color) = LOWER(?)");
-            parameters.add(color);
-        }
-
-        try (
-                // Open database connection
-                Connection connection = getConnection();
-                // Create the prepared statement with the final SQL
-                PreparedStatement statement = connection.prepareStatement(sql.toString())
-        )
-        {
-            // Bind the collected parameters to the prepared statement
-            for (int i = 0; i < parameters.size(); i++)
-            {
-                statement.setObject(i + 1, parameters.get(i));
-            }
-
-            // Execute the query
-            ResultSet resultSet = statement.executeQuery();
-
-            // Loop through the results and map each row to a Product object
-            while (resultSet.next())
-            {
-                Product product = mapRow(resultSet);
-                products.add(product);
-            }
-        }
-        catch (SQLException e)
-        {
-            // Print the stack trace for debugging purposes
-            e.printStackTrace();
-        }
-
-        // Return the list of matching products
-        return products;
-    }
-
-
-
 //    @Override
 //    public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String color)
 //    {
@@ -136,6 +58,50 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
 //
 //        return products;
 //    }
+@Override
+public List<Product> search(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, String color)
+{
+    List<Product> products = new ArrayList<>();
+
+    String sql = "SELECT * FROM products " +
+            "WHERE (category_id = ? OR ? = -1) " +
+            "  AND (price >= ? OR ? = -1) " +  // minPrice check
+            "  AND (price <= ? OR ? = -1) " +  // maxPrice check
+            "  AND (color = ? OR ? = '')";     // color check
+
+    categoryId = categoryId == null ? -1 : categoryId;
+    minPrice = minPrice == null ? new BigDecimal("-1") : minPrice;
+    maxPrice = maxPrice == null ? new BigDecimal("-1") : maxPrice;
+    color = color == null ? "" : color;
+
+    try (Connection connection = getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql))
+    {
+        statement.setInt(1, categoryId);
+        statement.setInt(2, categoryId);
+        statement.setBigDecimal(3, minPrice);
+        statement.setBigDecimal(4, minPrice);
+        statement.setBigDecimal(5, maxPrice);
+        statement.setBigDecimal(6, maxPrice);
+        statement.setString(7, color);
+        statement.setString(8, color);
+
+        ResultSet row = statement.executeQuery();
+
+        while (row.next())
+        {
+            Product product = mapRow(row);
+            products.add(product);
+        }
+    }
+    catch (SQLException e)
+    {
+        throw new RuntimeException(e);
+    }
+
+    return products;
+}
+
 
     @Override
     public List<Product> listByCategoryId(int categoryId)
