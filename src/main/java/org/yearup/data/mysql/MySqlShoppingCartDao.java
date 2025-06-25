@@ -59,8 +59,12 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
     @Override
     public void addProduct(int userId, int productId)
     {
+
+        //to check if the product is already in the cart
         String selectSql = "SELECT quantity FROM shopping_cart WHERE user_id = ? AND product_id = ?";
+        //if the product does not exist, insert it with quantity 1
         String insertSql = "INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
+        //if the product exists, increase the quantity
         String updateSql = "UPDATE shopping_cart SET quantity = quantity + 1 WHERE user_id = ? AND product_id = ?";
 
         try (Connection connection = getConnection())
