@@ -47,6 +47,12 @@ public class ShoppingCartItem
         return this.product.getProductId();
     }
 
+    // New Method Phase 5: Allow access to the product price directly from the item
+    public BigDecimal getPrice()
+    {
+        return this.product.getPrice();
+    }
+
     public BigDecimal getLineTotal()
     {
         BigDecimal basePrice = product.getPrice();
