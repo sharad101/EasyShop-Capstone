@@ -52,13 +52,13 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
 
         try (Connection connection = getConnection())
         {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setInt(1, userId);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, userId);
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next())
             {
-                return mapRow(rs); // convert the result set row into a Profile object
+                return mapRow(resultSet); // convert the result set row into a Profile object
             }
         }
         catch (SQLException e)
@@ -78,18 +78,18 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
 
         try (Connection connection = getConnection())
         {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, profile.getFirstName());
-            ps.setString(2, profile.getLastName());
-            ps.setString(3, profile.getPhone());
-            ps.setString(4, profile.getEmail());
-            ps.setString(5, profile.getAddress());
-            ps.setString(6, profile.getCity());
-            ps.setString(7, profile.getState());
-            ps.setString(8, profile.getZip());
-            ps.setInt(9, profile.getUserId());
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, profile.getFirstName());
+            preparedStatement.setString(2, profile.getLastName());
+            preparedStatement.setString(3, profile.getPhone());
+            preparedStatement.setString(4, profile.getEmail());
+            preparedStatement.setString(5, profile.getAddress());
+            preparedStatement.setString(6, profile.getCity());
+            preparedStatement.setString(7, profile.getState());
+            preparedStatement.setString(8, profile.getZip());
+            preparedStatement.setInt(9, profile.getUserId());
 
-            ps.executeUpdate();
+            preparedStatement.executeUpdate();
         }
         catch (SQLException e)
         {
