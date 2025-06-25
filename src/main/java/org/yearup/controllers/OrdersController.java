@@ -8,7 +8,6 @@ import org.yearup.data.OrderDao;
 import org.yearup.data.ProfileDao;
 import org.yearup.data.ShoppingCartDao;
 import org.yearup.models.*;
-//import org.yearup.models.security.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,32 +29,31 @@ public class OrdersController
         this.profileDao = profileDao;
     }
 
-    // POST /orders – Convert cart to order
+    // This endpoint handles the checkout process
     @PostMapping
     public ResponseEntity<Order> checkout(@AuthenticationPrincipal User user)
     {
-        int userId = user.getId();
+        int userId = user.getId(); // ✅ Get logged-in user ID
 
-        // Get the current user's cart
+        // 1. Get the user's cart
         ShoppingCart cart = cartDao.getByUserId(userId);
 
-        // 1. Get cart items
+        // 2. Extract cart items from the map and convert to a list
         List<ShoppingCartItem> cartItems = new ArrayList<>(cart.getItems().values());
 
         if (cartItems.isEmpty())
         {
-            return ResponseEntity.badRequest().build(); // nothing to checkout
+            return ResponseEntity.badRequest().build(); // No items to checkout
         }
 
-
-        // 2. Get profile for shipping info
+        //3. Get profile for shipping details
         Profile profile = profileDao.getByUserId(userId);
         if (profile == null)
         {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // missing profile
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Missing profile
         }
 
-        // 3. Create Order
+        // 4. Create a new Order object
         Order order = new Order();
         order.setUserId(userId);
         order.setDate(LocalDateTime.now());
@@ -63,27 +61,31 @@ public class OrdersController
         order.setCity(profile.getCity());
         order.setState(profile.getState());
         order.setZip(profile.getZip());
-        order.setShippingAmount(BigDecimal.ZERO); // You can later customize shipping logic
+        order.setShippingAmount(BigDecimal.ZERO); // 💡 Customize shipping if needed
 
-        // 4. Insert order
+        // 5. Save the order and get back the saved order (with orderId)
         Order savedOrder = orderDao.createOrder(order);
 
-        // 5. Add line items
+        // 6. Convert each ShoppingCartItem into an OrderItem
         for (ShoppingCartItem item : cartItems)
         {
             OrderItem lineItem = new OrderItem();
             lineItem.setOrderId(savedOrder.getOrderId());
             lineItem.setProductId(item.getProductId());
-            lineItem.setSalesPrice(item.getPrice());     // product price at time of checkout
+
+            //NEW: Use item.getPrice() (which you added to ShoppingCartItem)
+            lineItem.setSalesPrice(item.getPrice());
+
             lineItem.setQuantity(item.getQuantity());
-            lineItem.setDiscount(BigDecimal.ZERO);        // You could apply coupons/promos here
+            lineItem.setDiscount(BigDecimal.ZERO); // 💡 Add discount logic if needed
+
             orderDao.addLineItem(lineItem);
         }
 
-        // 6. Clear the cart
+        // 7. Clear cart after successful order
         cartDao.clearCart(userId);
 
-        // 7. Return order
+        // 8. Return the saved order
         return ResponseEntity.ok(savedOrder);
     }
 }
