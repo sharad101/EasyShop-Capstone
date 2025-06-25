@@ -113,5 +113,5 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
 
         return new Profile(userId, firstName, lastName, phone, email, address, city, state, zip);
     }
-    
+
 }
