@@ -12,3 +12,10 @@ public class EasyshopApplication
     }
 
 }
+
+
+//Try for user: username: user, password: password
+//
+//Try for admin: username: admin, password: password
+//
+//Try for george: username: george, password: password

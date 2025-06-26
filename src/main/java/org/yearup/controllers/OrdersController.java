@@ -33,7 +33,7 @@ public class OrdersController
     @PostMapping
     public ResponseEntity<Order> checkout(@AuthenticationPrincipal User user)
     {
-        int userId = user.getId(); // ✅ Get logged-in user ID
+        int userId = user.getId(); // Get logged-in user ID
 
         // 1. Get the user's cart
         ShoppingCart cart = cartDao.getByUserId(userId);
@@ -77,7 +77,7 @@ public class OrdersController
             lineItem.setSalesPrice(item.getPrice());
 
             lineItem.setQuantity(item.getQuantity());
-            lineItem.setDiscount(BigDecimal.ZERO); // 💡 Add discount logic if needed
+            lineItem.setDiscount(BigDecimal.ZERO); // Add discount logic if needed
 
             orderDao.addLineItem(lineItem);
         }
