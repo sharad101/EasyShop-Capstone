@@ -105,8 +105,7 @@ Follow these steps to get your application running within IntelliJ IDEA:
         }
     }
 
-Purpose: The code check to see if a receipts file is generated. If not it creates one.
-It automatically saves all unique receipts to the file, stored in an organize manner.
+Purpose: This method enables users to add a product to their cart. If the item is already there, it increases the quantity. If it's new, it adds it with a quantity of 1.
 
 
 ## Future Work
