@@ -109,8 +109,8 @@ Purpose: This method enables users to add a product to their cart. If the item i
 
 
 ## Future Work
-In the future features I would add is Phase 5. When a user is ready to check out you need to convert their shopping cart into an
-order. Once the order has been created you should clear the shopping cart. Implement a checkout button for this implementation.
+In the future I would implement Phase 5. When a user is ready to check out you need to convert their shopping cart into an
+order. Once the order has been created you should clear the shopping cart. ALso implement a checkout button for this implementation.
 
 
 
