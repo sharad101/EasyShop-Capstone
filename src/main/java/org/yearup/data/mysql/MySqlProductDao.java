@@ -23,15 +23,9 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     {
         List<Product> products = new ArrayList<>();
 
-        // OLD SQL (BUGGY - only checks upper bound for price)
-    /*
-    String sql = "SELECT * FROM products " +
-            "WHERE (category_id = ? OR ? = -1) " +
-            "   AND (price <= ? OR ? = -1) " +
-            "   AND (color = ? OR ? = '') ";
-    */
-
-        // NEW SQL (FIXED - checks both min and max price)
+        //Phase 2 Bug 1
+        //Old sql only checks upper bound for price
+        //New sql query that checks min and max
         String sql = "SELECT * FROM products " +
                 "WHERE (category_id = ? OR ? = -1) " +
                 "  AND (price >= ? OR ? = -1) " +  // new: check minPrice
@@ -47,15 +41,7 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql))
         {
-            // OLD (BUGGY - only 6 parameters, repeated minPrice in place of maxPrice)
-        /*
-        statement.setInt(1, categoryId);
-        statement.setInt(2, categoryId);
-        statement.setBigDecimal(3, minPrice);
-        statement.setBigDecimal(4, minPrice);
-        statement.setString(5, color);
-        statement.setString(6, color);
-        */
+
 
             //NEW (CORRECT parameter mapping for category, minPrice, maxPrice, and color)
             statement.setInt(1, categoryId);           // categoryId

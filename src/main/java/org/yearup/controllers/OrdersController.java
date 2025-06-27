@@ -43,7 +43,7 @@ public class OrdersController
 
         try
         {
-            // NEW: Delegate the entire checkout business logic to the OrderService
+            // NEW: Shift the entire checkout business logic to the OrderService
             // The service method will handle fetching cart, profile, creating order,
             // adding line items, clearing cart, and crucially, transactional management.
             Order newOrder = orderService.placeOrder(user);

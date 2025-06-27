@@ -11,6 +11,8 @@ import org.yearup.models.User;
 
 import java.security.Principal;
 
+
+//Phase 4 Optional
 @RestController
 @RequestMapping("/profile")
 @CrossOrigin

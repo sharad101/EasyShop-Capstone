@@ -9,6 +9,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
+//Phase 1
 @Component
 public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
 {

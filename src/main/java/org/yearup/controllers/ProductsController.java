@@ -84,7 +84,8 @@ public class ProductsController
     {
         try
         {
-            //productDao.create(product); BUG 2 old code thats wrong
+            //productDao.create(product);
+            //Old code that creates not update
             //New Update code to fix BUG 2
             productDao.update(id, product);
         }
